@@ -35,13 +35,72 @@ router.get('/', function(req, res) {
     res.json({ message: 'API Initialized!' });
 });
 
-router.route('/test')
-    .get(function(req, res) {
-        Test.find(function(err, test) {
+//GET ALL
+router.route('/test').get(function(req, res) {
+    Test.find({}, function(err, test) {
+        if (err)
+            res.send(err);
+        res.json(test)
+    });
+});
+
+//INSERT
+router.route('/test').post(function(req, res) {
+    console.log(req.body);
+
+    let testObject = new Test({
+        test_ID: req.body.test_ID,
+        test_field: req.body.test_field
+    });
+
+    testObject.save(function(err, doc) {
+        if (!err) {
+            console.log("created");
+            res.json(doc);
+        } else {
+            console.log(err);
+            res.send(err);
+        }
+    });
+});
+
+//GET ONE
+router.route('/test/:test_ID').get(function(req, res) {
+    Test.find({ test_ID: req.params.test_ID }, function(err, doc) {
+        if (err)
+            res.send(err);
+        res.json(doc);
+    });
+});
+
+//UPDATE ONE
+router.route('/test/:test_ID').put(function(req, res) {
+    Test.findOne({test_ID: req.params.test_ID}, function(err, doc) {
+
             if (err)
                 res.send(err);
-            res.json(test)
+
+            doc.test_field = req.body.test_field;  
+
+            doc.save(function(err, updatedDoc) {
+                if (err)
+                    res.send(err);
+
+                res.json(updatedDoc);
+            });
+
         });
+});
+
+///DELETE ONE
+router.route('/test/:test_ID').delete(function(req, res) {
+    Test.findOneAndRemove({
+        test_ID: req.params.test_ID
+    }, function(err, doc) {
+        if (err)
+            res.send(err);
+        res.json(doc);
+    });
 });
 
 app.use('/api', router);
